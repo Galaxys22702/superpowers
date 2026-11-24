@@ -49,7 +49,12 @@ PATTERN="${1:-}"
 # Function to extract description from SKILL.md
 get_description() {
     local file="$1"
-    grep "^description:" "$file" 2>/dev/null | sed 's/description: *//' || echo ""
+    awk '
+        { sub(/\r$/, "") }
+        NR == 1 { if ($0 != "---") exit; next }
+        /^---$/ { exit }
+        /^description:/ { sub(/^description:[[:blank:]]*/, ""); print; exit }
+    ' "$file"
 }
 
 # Function to get relative skill path
